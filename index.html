@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/lib/theme-chalk/index.css">
+    <title>Text Generator</title>
+    <style>
+        .result {
+            border: 1px solid lightgray;
+            margin: 0;
+            height: 100%;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <el-container>
+            <el-main>
+                <h2>Unicode Decoder</h2>
+                <el-row :gutter="10">
+                    <el-col :span="12">
+                        <el-input
+                          type="textarea"
+                          :autosize="{ minRows: 5}"
+                          placeholder="Please input"
+                          v-model="targetText">
+                        </el-input>
+                    </el-col>
+                    <el-col :span="12">
+                        <pre class="result">{{decoded}}</pre>
+                        <!-- <div class="result">{{decoded}}</div> -->
+                    </el-col>
+                </el-row>
+            </el-main>
+        </el-container>
+    </div>
+    <script src="https://unpkg.com/vue@3.0.6"></script>
+    <script src="https://unpkg.com/element-plus/lib/index.full.js"></script>
+    <script>
+        const app = {
+            data() {
+                return {
+                    targetText: "",
+                }
+            },
+            computed: {
+                decoded() {
+                    const textDecoded = this.decodeText(this.targetText);
+                    return textDecoded.replace(/\\n/g, "\n");
+                }
+            },
+            methods: {
+                decodeText(text) {
+                    if (text === "") return "";
+                    const unicodeRegex = /\\u.{4}/ig;
+                    const texts = text.split(unicodeRegex);
+                    const unicodes = text.match(unicodeRegex) ?? [];
+                    const unicodesConverted = unicodes.map(s => String.fromCharCode(s.replace('\\u', '0x')));
+                    unicodesConverted.push("");
+                    return texts.reduce((temp, t, i) => {
+                        temp += (t + unicodesConverted[i]);
+                        return temp;
+                    }, "");
+                    //const strs = text.match(/\\u.{4}/ig);
+                    //if (!strs) return '';
+                    //return strs.reduce((temp, s) => {
+                    //    temp += String.fromCharCode(s.replace('\\u', '0x'));
+                    //    return temp;
+                    //}, "");
+                }
+            }
+        };
+        Vue.createApp(app).use(ElementPlus).mount('#app')
+    </script>
+</body>
+
+</html>
